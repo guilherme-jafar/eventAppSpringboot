@@ -1,5 +1,8 @@
 package com.tecside.appEvent.controllers;
 
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import jakarta.servlet.ServletException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +20,14 @@ public class EventController {
 
     @GetMapping("/restricted")
     public ResponseEntity<?> getRestrictedMessage(){
-        return new ResponseEntity<>("This is a restricted message", HttpStatus.OK);
+
+        try {
+            return new ResponseEntity<>("This is a restricted message", HttpStatus.OK);
+        }catch (JWTDecodeException e){
+            return new ResponseEntity<>("Unauthorized!!", HttpStatus.UNAUTHORIZED);
+        }
+
+
     }
 
 }

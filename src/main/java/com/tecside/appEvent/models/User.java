@@ -2,14 +2,17 @@ package com.tecside.appEvent.models;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
-@Entity(name = "users")
+@Entity
+@Table (name = "users", schema = "public")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @Column(name = "full_name")
     private String fullName;
@@ -32,6 +35,10 @@ public class User {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+
+    @OneToMany(mappedBy = "user")
+    private List<Event> events;
+
     public User(){
 
     }
@@ -41,11 +48,11 @@ public class User {
         this.password = password;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -96,6 +103,7 @@ public class User {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 
     public String getPassword() {
         return password;

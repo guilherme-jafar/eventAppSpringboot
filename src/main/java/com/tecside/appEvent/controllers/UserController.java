@@ -35,7 +35,12 @@ public class UserController {
             return new ResponseEntity<>(user, HttpStatus.CREATED);
 
         } catch (DataIntegrityViolationException e) {
-            return new ResponseEntity<>("{error: A user with the same email already exists}", HttpStatus.CONFLICT);
+            String errorMessage = e.getMessage();
+            if (errorMessage.equals("Wrong Email Format") || errorMessage.equals("Missing Password")) {
+                return new ResponseEntity<>("{error: "+errorMessage+"}", HttpStatus.UNAUTHORIZED);
+            } else {
+                return new ResponseEntity<>("{error: User email already exists}", HttpStatus.CONFLICT);
+            }
 
 
         } catch (Exception e) {
@@ -54,20 +59,17 @@ public class UserController {
             }
 
 
-            User userData = userService.getUserByEmailAndPassword(user.getEmail(), user.getPassword());
+            User userData = userService.getUserByEmail(user.getEmail(), user.getPassword());
 
-            if (userData == null) {
-                throw new UserPrincipalNotFoundException("Email or Password is invalid");
-
-            }
-
-            return new ResponseEntity<>(jwtGenerator.generateToken(user), HttpStatus.OK);
+            return new ResponseEntity<>(jwtGenerator.generateToken(userData), HttpStatus.OK);
 
         } catch (UserPrincipalNotFoundException e) {
 
-            return new ResponseEntity<>("{error: Invalid email or password}", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("{error: "+e.getMessage()+"}", HttpStatus.UNAUTHORIZED);
+
+
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e.getStackTrace());
             return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -79,13 +81,34 @@ public class UserController {
 
             Optional<User> user = userService.getUserById(userId);
 
-            if(user.isEmpty()){
-                return new ResponseEntity<>("{error: The user with ID "+userId+" could not be found}", HttpStatus.NOT_FOUND);
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("{error: The user with ID " + userId + " could not be found}", HttpStatus.NOT_FOUND);
             }
 
             return new ResponseEntity<>(user, HttpStatus.OK);
 
-        }catch (Exception e){
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId, @RequestBody User user) {
+
+
+        try {
+
+            userService.updateUser(userId, user);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+
+        } catch (DataIntegrityViolationException e) {
+
+            return new ResponseEntity<>("{error: "+e.getMessage()+"}", HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
             System.out.println(e.toString());
             return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
 
@@ -93,13 +116,10 @@ public class UserController {
 
     }
 //
-//    @PutMapping("/{userId}")
-//    public ResponseEntity<Void> updateUser(@PathVariable("userId") Long userId, @RequestBody UserDto userDto) {
-//        // Logic for updating an existing user
-//    }
-//
 //    @DeleteMapping("/{userId}")
 //    public ResponseEntity<Void> deleteUser(@PathVariable("userId") Long userId) {
 //        // Logic for deleting an existing user
 //    }
+
+
 }

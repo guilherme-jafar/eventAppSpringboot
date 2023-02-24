@@ -12,9 +12,11 @@ import java.util.Optional;
 public interface UserService {
 
     public void saveUser(User user)throws DataIntegrityViolationException;
-    public User getUserByEmailAndPassword(String name, String password) throws UserPrincipalNotFoundException;
+    public User getUserByEmail(String name, String password) throws UserPrincipalNotFoundException;
 
-    public Optional<User> getUserById(Long id)throws UserPrincipalNotFoundException;
+    public Optional<User> getUserById(Long id);
+
+    public User updateUser(Long userId, User user)throws DataIntegrityViolationException;
 
 
 }

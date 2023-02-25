@@ -1,12 +1,15 @@
 package com.tecside.appEvent.controllers;
 
+import com.tecside.appEvent.errors.ErrorMessages;
 import com.tecside.appEvent.models.User;
 import com.tecside.appEvent.services.UserService;
 import com.tecside.appEvent.utils.JwtGeneratorInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
@@ -21,10 +24,12 @@ public class UserController {
     private UserService userService;
     private JwtGeneratorInterface jwtGenerator;
 
+
     @Autowired
     public UserController(UserService userService, JwtGeneratorInterface jwtGenerator) {
         this.userService = userService;
         this.jwtGenerator = jwtGenerator;
+
     }
 
     @PostMapping("/register")
@@ -36,16 +41,16 @@ public class UserController {
 
         } catch (DataIntegrityViolationException e) {
             String errorMessage = e.getMessage();
-            if (errorMessage.equals("Wrong Email Format") || errorMessage.equals("Missing Password")) {
-                return new ResponseEntity<>("{error: "+errorMessage+"}", HttpStatus.UNAUTHORIZED);
+            if (errorMessage.equals(ErrorMessages.WRONG_EMAIL_FORMAT) || errorMessage.equals(ErrorMessages.MISSING_PASSWORD) || errorMessage.equals(ErrorMessages.MISSING_EMAIL)) {
+                return new ResponseEntity<>(ErrorMessages.errorJSON(errorMessage), HttpStatus.BAD_REQUEST);
             } else {
-                return new ResponseEntity<>("{error: User email already exists}", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.EMAIL_ALREADY_EXISTS), HttpStatus.CONFLICT);
             }
 
 
         } catch (Exception e) {
             System.out.println(e.toString());
-            return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -54,23 +59,23 @@ public class UserController {
         try {
 
             if (user.getEmail() == null || user.getPassword() == null) {
-                throw new UserPrincipalNotFoundException("Email or Password is Empty");
+                throw new BadCredentialsException(ErrorMessages.MISSING_PASSWORD_OR_EMAIL);
 
             }
 
 
-            User userData = userService.getUserByEmail(user.getEmail(), user.getPassword());
+            User userData = userService.login(user.getEmail(), user.getPassword());
 
             return new ResponseEntity<>(jwtGenerator.generateToken(userData), HttpStatus.OK);
 
-        } catch (UserPrincipalNotFoundException e) {
+        } catch (BadCredentialsException e) {
 
-            return new ResponseEntity<>("{error: "+e.getMessage()+"}", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), HttpStatus.UNAUTHORIZED);
 
 
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
-            return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
+            //System.out.println(e.getStackTrace());
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -82,15 +87,14 @@ public class UserController {
             Optional<User> user = userService.getUserById(userId);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("{error: The user with ID " + userId + " could not be found}", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.USER_NOT_FOUND), HttpStatus.NOT_FOUND);
             }
 
             return new ResponseEntity<>(user, HttpStatus.OK);
 
         } catch (Exception e) {
             System.out.println(e.toString());
-            return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
-
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -107,19 +111,34 @@ public class UserController {
 
         } catch (DataIntegrityViolationException e) {
 
-            return new ResponseEntity<>("{error: "+e.getMessage()+"}", HttpStatus.UNAUTHORIZED);
+            HttpStatus httpStatus = (e.getMessage().equals(ErrorMessages.USER_NOT_FOUND))? HttpStatus.NOT_FOUND: HttpStatus.BAD_REQUEST;
+
+            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()),httpStatus);
         } catch (Exception e) {
             System.out.println(e.toString());
-            return new ResponseEntity<>("{error: An error occurred while processing your request. Please try again later}", HttpStatus.INTERNAL_SERVER_ERROR);
-
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
-//
-//    @DeleteMapping("/{userId}")
-//    public ResponseEntity<Void> deleteUser(@PathVariable("userId") Long userId) {
-//        // Logic for deleting an existing user
-//    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId) {
+
+        try {
+
+            userService.deleteUser(userId);
+
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        } catch (EmptyResultDataAccessException e) {
+
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.USER_NOT_FOUND), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
 
 }

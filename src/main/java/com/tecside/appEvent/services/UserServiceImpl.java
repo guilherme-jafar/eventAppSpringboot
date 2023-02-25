@@ -1,15 +1,16 @@
 package com.tecside.appEvent.services;
 
+import com.tecside.appEvent.errors.ErrorMessages;
 import com.tecside.appEvent.models.User;
 import com.tecside.appEvent.repositories.UserRepository;
-import jdk.jfr.StackTrace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -32,12 +33,18 @@ public class UserServiceImpl implements UserService {
         String email = user.getEmail();
         String password = user.getPassword();
 
-        if (email == null || !isValidEmailFormat(email)) {
-            throw new DataIntegrityViolationException("Wrong Email Format");
+        if (email == null) {
+            throw new DataIntegrityViolationException(ErrorMessages.MISSING_EMAIL);
         }
 
+
         if (password == null) {
-            throw new DataIntegrityViolationException("Password can't be empty");
+            throw new DataIntegrityViolationException(ErrorMessages.MISSING_PASSWORD);
+        }
+
+
+        if (!isValidEmailFormat(email)) {
+            throw new DataIntegrityViolationException(ErrorMessages.WRONG_EMAIL_FORMAT);
         }
 
 
@@ -51,17 +58,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByEmail(String email, String password) throws UserPrincipalNotFoundException {
+    public User login(String email, String password) throws BadCredentialsException {
 
 
         User user = userRepository.findByEmail(email);
 
         if (user == null) {
-            throw new UserPrincipalNotFoundException("Account don't exist");
+            throw new BadCredentialsException(ErrorMessages.INVALID_PASSWORD_EMAIL);
         }
 
-        if (!passwordEncoder().matches(password, user.getPassword())) {
-            throw new UserPrincipalNotFoundException("Invalid email or password");
+        if (!passwordEncoder().matches(password, user.getPassword()) ) {
+            throw new BadCredentialsException(ErrorMessages.INVALID_PASSWORD_EMAIL);
         }
 
 
@@ -80,22 +87,18 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> optional = userRepository.findById(userId);
         if (optional.isEmpty()) {
-            throw new DataIntegrityViolationException("User not found");
+            throw new DataIntegrityViolationException(ErrorMessages.USER_NOT_FOUND);
 
         }
 
         User user = optional.get();
 
 
-        if (updatedUser.getFullName() == null) {
-            throw new DataIntegrityViolationException("User name can't be empty");
-        }
-
         String mobileNumber = updatedUser.getMobileNumber();
 
         if (mobileNumber != null) {
             if (mobileNumber.length() != 9) {
-                throw new DataIntegrityViolationException("Wrong number format");
+                throw new DataIntegrityViolationException(ErrorMessages.WRONG_NUMBER_FORMAT);
             }
 
             user.setMobileNumber(mobileNumber);
@@ -111,16 +114,21 @@ public class UserServiceImpl implements UserService {
 
         String countryCode = updatedUser.getCountryCode();
 
-        if (countryCode!= null){
+        if (countryCode != null) {
             user.setCountryCode(countryCode);
         }
         user.setUpdatedAt(new Date());
         user.setFullName(updatedUser.getFullName());
 
 
-
         return userRepository.saveAndFlush(user);
 
+
+    }
+
+    public void deleteUser(Long userId) throws EmptyResultDataAccessException {
+
+        userRepository.deleteById(userId);
 
     }
 
@@ -129,7 +137,7 @@ public class UserServiceImpl implements UserService {
         return new BCryptPasswordEncoder(10);
     }
 
-    public boolean isValidEmailFormat(String email){
+    public boolean isValidEmailFormat(String email) {
         String regex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$";
         return email.matches(regex);
     }

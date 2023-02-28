@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users", schema = "public")
@@ -15,8 +16,8 @@ public class User {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     @Column(name = "full_name")
     private String fullName;
@@ -44,7 +45,7 @@ public class User {
     private Date updatedAt;
 
     @Column(name = "country_code")
-    private String countrycode;
+    private String countryCode;
 
 
     @OneToMany(mappedBy = "user")
@@ -59,11 +60,11 @@ public class User {
         this.password = password;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -125,11 +126,11 @@ public class User {
     }
 
     public String getCountryCode() {
-        return countrycode;
+        return countryCode;
     }
 
     public void setCountryCode(String countryCode) {
-        this.countrycode = countryCode;
+        this.countryCode = countryCode;
     }
 
 }

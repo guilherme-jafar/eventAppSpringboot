@@ -1,11 +1,13 @@
 package com.tecside.appEvent.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "events", schema = "public")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Event {
 
     @Id
@@ -44,6 +46,10 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "users_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private  Category category;
 
     public Event() {
     }

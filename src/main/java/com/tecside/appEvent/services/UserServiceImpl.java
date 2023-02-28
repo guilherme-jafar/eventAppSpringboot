@@ -11,14 +11,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
@@ -27,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void saveUser(User user) throws DataIntegrityViolationException {
+    public Optional<User> saveUser(User user) throws DataIntegrityViolationException {
 
 
         String email = user.getEmail();
@@ -47,14 +49,18 @@ public class UserServiceImpl implements UserService {
             throw new DataIntegrityViolationException(ErrorMessages.WRONG_EMAIL_FORMAT);
         }
 
+        User newUser = new User();
+        Date createdAt = new Date();
+        String id = UUID.randomUUID().toString();
+        newUser.setId(id);
+        newUser.setCreatedAt(createdAt);
+        newUser.setPassword(passwordEncoder().encode(user.getPassword()));
+        newUser.setTypeOfLogin("NORMAL");
+        newUser.setEmail(email);
 
-        Date createdAta = new Date();
-        user.setCreatedAt(createdAta);
-        user.setPassword(passwordEncoder().encode(user.getPassword()));
-        user.setTypeOfLogin("NORMAL");
 
-
-        userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(newUser);
+        return userRepository.findById(id);
     }
 
     @Override
@@ -76,14 +82,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
+    public Optional<User> getUserById(String id) {
 
         return userRepository.findById(id);
 
     }
 
     @Override
-    public User updateUser(Long userId, User updatedUser) throws DataIntegrityViolationException {
+    public User updateUser(String userId, User updatedUser) throws DataIntegrityViolationException {
 
         Optional<User> optional = userRepository.findById(userId);
         if (optional.isEmpty()) {
@@ -126,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public void deleteUser(Long userId) throws EmptyResultDataAccessException {
+    public void deleteUser(String userId) throws EmptyResultDataAccessException {
 
         userRepository.deleteById(userId);
 

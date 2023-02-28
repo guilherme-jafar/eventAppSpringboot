@@ -17,6 +17,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -129,6 +131,24 @@ public class UserTest {
     }
 
     @Test
+    public void testSuccessfulCreateUser() throws Exception {
+
+        String password = "passe12";
+        String email = "john.doe@gmail.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(password);
+
+
+
+        assertNotNull( userService.saveUser(user));
+
+
+
+
+    }
+
+    @Test
     public void testSuccessfulUpdate() throws Exception {
 
         User user = new User();
@@ -139,7 +159,7 @@ public class UserTest {
         user.setCountryCode("+244");
 
 
-        assertNotNull( userService.updateUser(25L, user));
+        assertNotNull( userService.updateUser("25", user));
 
     }
 
@@ -154,7 +174,7 @@ public class UserTest {
         user.setCountryCode("+244");
 
         try {
-            assertNotNull( userService.updateUser(25L, user));
+            assertNotNull( userService.updateUser("25L", user));
             fail("Expected DataIntegrityViolationException to be thrown");
         } catch (DataIntegrityViolationException e) {
             assertEquals(ErrorMessages.WRONG_NUMBER_FORMAT, e.getMessage());
@@ -176,7 +196,7 @@ public class UserTest {
         user.setCountryCode("+244");
 
         try {
-            assertNotNull( userService.updateUser(2502L, user));
+            assertNotNull( userService.updateUser("2502L", user));
             fail("Expected DataIntegrityViolationException to be thrown");
         } catch (DataIntegrityViolationException e) {
             assertEquals(ErrorMessages.USER_NOT_FOUND, e.getMessage());

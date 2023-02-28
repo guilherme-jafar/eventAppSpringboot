@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @RestController
@@ -21,8 +22,8 @@ import java.util.Optional;
 public class UserController {
 
 
-    private UserService userService;
-    private JwtGeneratorInterface jwtGenerator;
+    private final UserService userService;
+    private final JwtGeneratorInterface jwtGenerator;
 
 
     @Autowired
@@ -36,8 +37,8 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
 
-            userService.saveUser(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
+            User newUser = userService.saveUser(user).get();
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
 
         } catch (DataIntegrityViolationException e) {
             String errorMessage = e.getMessage();
@@ -80,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable("userId") Long userId) {
+    public ResponseEntity<?> getUserById(@PathVariable("userId") String userId) {
 
         try {
 
@@ -100,7 +101,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable("userId") String userId, @RequestBody User user) {
 
 
         try {
@@ -122,7 +123,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable("userId") Long userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") String userId) {
 
         try {
 

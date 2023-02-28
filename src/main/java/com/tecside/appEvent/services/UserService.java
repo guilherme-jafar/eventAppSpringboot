@@ -8,18 +8,19 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public interface UserService {
 
-    public void saveUser(User user)throws DataIntegrityViolationException;
-    public User login(String name, String password) throws BadCredentialsException;
+    Optional<User>  saveUser(User user)throws DataIntegrityViolationException;
+    User login(String name, String password) throws BadCredentialsException;
 
-    public Optional<User> getUserById(Long id);
+    Optional<User> getUserById(String  id);
 
-    public User updateUser(Long userId, User user)throws DataIntegrityViolationException;
+    User updateUser(String userId, User user)throws DataIntegrityViolationException;
 
 
-    public void deleteUser(Long userId);
+    void deleteUser(String userId);
 
 }

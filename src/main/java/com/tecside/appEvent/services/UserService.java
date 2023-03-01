@@ -13,7 +13,7 @@ import java.util.UUID;
 @Service
 public interface UserService {
 
-    Optional<User>  saveUser(User user)throws DataIntegrityViolationException;
+    User saveUser(User user)throws DataIntegrityViolationException;
     User login(String name, String password) throws BadCredentialsException;
 
     Optional<User> getUserById(String  id);

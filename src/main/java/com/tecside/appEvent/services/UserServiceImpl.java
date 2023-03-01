@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Optional<User> saveUser(User user) throws DataIntegrityViolationException {
+    public User saveUser(User user) throws DataIntegrityViolationException {
 
 
         String email = user.getEmail();
@@ -51,16 +51,14 @@ public class UserServiceImpl implements UserService {
 
         User newUser = new User();
         Date createdAt = new Date();
-        String id = UUID.randomUUID().toString();
-        newUser.setId(id);
         newUser.setCreatedAt(createdAt);
         newUser.setPassword(passwordEncoder().encode(user.getPassword()));
         newUser.setTypeOfLogin("NORMAL");
         newUser.setEmail(email);
 
 
-        userRepository.saveAndFlush(newUser);
-        return userRepository.findById(id);
+
+        return userRepository.saveAndFlush(newUser);
     }
 
     @Override

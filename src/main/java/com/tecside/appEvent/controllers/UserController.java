@@ -12,9 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @RestController
@@ -37,8 +35,11 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
 
-            User newUser = userService.saveUser(user).get();
+            User newUser = userService.saveUser(user);
+
+
             return new ResponseEntity<>(newUser, HttpStatus.CREATED);
+
 
         } catch (DataIntegrityViolationException e) {
             String errorMessage = e.getMessage();
@@ -50,7 +51,7 @@ public class UserController {
 
 
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e);
             return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -106,15 +107,15 @@ public class UserController {
 
         try {
 
-            userService.updateUser(userId, user);
+            User updatedUser = userService.updateUser(userId, user);
 
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException e) {
 
-            HttpStatus httpStatus = (e.getMessage().equals(ErrorMessages.USER_NOT_FOUND))? HttpStatus.NOT_FOUND: HttpStatus.BAD_REQUEST;
+            HttpStatus httpStatus = (e.getMessage().equals(ErrorMessages.USER_NOT_FOUND)) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
 
-            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()),httpStatus);
+            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), httpStatus);
         } catch (Exception e) {
             System.out.println(e.toString());
             return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);

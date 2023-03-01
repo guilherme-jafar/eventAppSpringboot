@@ -9,6 +9,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/categories")
@@ -23,12 +26,12 @@ public class CategoryController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> createCategory(@RequestBody Category category){
+    public ResponseEntity<?> createCategory(@RequestBody Category newCategory){
 
         try {
 
-            categoryService.createCategory(category);
-            return  new ResponseEntity<>(category, HttpStatus.CREATED);
+           Optional<Category> category= categoryService.createCategory(newCategory);
+            return  new ResponseEntity<>(category.get(), HttpStatus.CREATED);
 
         }catch (DataIntegrityViolationException e){
             return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), HttpStatus.BAD_REQUEST);
@@ -39,6 +42,24 @@ public class CategoryController {
         }
 
     }
+
+//    @PostMapping("/image/upload")
+//    public ResponseEntity<?> uploadImage(@@RequestParam("file")MultipartFile file){
+//
+//        try {
+//
+//            Optional<Category> category= categoryService.createCategory(newCategory);
+//            return  new ResponseEntity<>(category.get(), HttpStatus.CREATED);
+//
+//        }catch (DataIntegrityViolationException e){
+//            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), HttpStatus.BAD_REQUEST);
+//        }catch (Exception e){
+//            System.out.println(e.toString());
+//            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//        }
+
+//    }
 
 //    @PutMapping("/categoryId}")
 //    public ResponseEntity<?> updateUser(@PathVariable("categoryId") Long categoryId, @RequestBody Category category) {

@@ -4,6 +4,7 @@ import com.tecside.appEvent.errors.ErrorMessages;
 import com.tecside.appEvent.models.Category;
 import com.tecside.appEvent.models.User;
 import com.tecside.appEvent.services.CategoryService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -43,23 +45,23 @@ public class CategoryController {
 
     }
 
-//    @PostMapping("/image/upload")
-//    public ResponseEntity<?> uploadImage(@@RequestParam("file")MultipartFile file){
-//
-//        try {
-//
-//            Optional<Category> category= categoryService.createCategory(newCategory);
-//            return  new ResponseEntity<>(category.get(), HttpStatus.CREATED);
-//
-//        }catch (DataIntegrityViolationException e){
-//            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), HttpStatus.BAD_REQUEST);
-//        }catch (Exception e){
-//            System.out.println(e.toString());
-//            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
-//
-//        }
+    @PostMapping("{categoryId}/image")
+    public ResponseEntity<?> uploadImage(@PathVariable("categoryId")String id, @RequestParam("file")MultipartFile file){
 
-//    }
+        try {
+
+            Category category= categoryService.uploadImage(id, file);
+            return  new ResponseEntity<>(category, HttpStatus.CREATED);
+
+        }catch (EntityNotFoundException | IOException e){
+            return new ResponseEntity<>(ErrorMessages.errorJSON(e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (Exception e){
+            System.out.println(e.toString());
+            return new ResponseEntity<>(ErrorMessages.errorJSON(ErrorMessages.GENERAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+
+    }
 
 //    @PutMapping("/categoryId}")
 //    public ResponseEntity<?> updateUser(@PathVariable("categoryId") Long categoryId, @RequestBody Category category) {

@@ -9,6 +9,8 @@ public class ErrorMessages {
     public static final String MISSING_NAME = "Name is required";
 
     public static final String MISSING_IMAGE= "Image is required";
+
+    public static final String WRONG_IMAGE_EXTENSION= "Image extension not allowed";
     public static final String WRONG_EMAIL_FORMAT = "Wrong email format";
 
     public static final String EMAIL_ALREADY_EXISTS = "User email already exists";
@@ -25,6 +27,8 @@ public class ErrorMessages {
     public static final String INVALID_PASSWORD_EMAIL = "Invalid email or password";
 
     public static final String GENERAL_ERROR = "An error occurred while processing your request. Please try again later";
+
+
 
 
     public static String errorJSON(String message){

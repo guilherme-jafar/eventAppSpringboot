@@ -31,8 +31,6 @@ public class Event {
     @Column(name = "location")
     private String location;
 
-    @Column(name = "venue")
-    private String venue;
 
     @Column(name = "tags")
     private String tags;
@@ -48,7 +46,7 @@ public class Event {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "categories_id")
     private  Category category;
 
     public Event() {
@@ -100,14 +98,6 @@ public class Event {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public String getVenue() {
-        return venue;
-    }
-
-    public void setVenue(String venue) {
-        this.venue = venue;
     }
 
     public String getTags() {

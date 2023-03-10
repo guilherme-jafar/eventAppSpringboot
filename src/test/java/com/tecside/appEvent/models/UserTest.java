@@ -42,7 +42,7 @@ public class UserTest {
     @Test
     public void testLoginSuccess()throws Exception {
 
-        String password = "passe12";
+        String password = "passe123";
         String email = "john.doe@gmail.com";
 
 
@@ -133,8 +133,8 @@ public class UserTest {
     @Test
     public void testSuccessfulCreateUser() throws Exception {
 
-        String password = "passe12";
-        String email = "john.doe7@gmail.com";
+        String password = "passe123";
+        String email = "john.doe2@gmail.com";
         User user = new User();
         user.setEmail(email);
         user.setPassword(password);
@@ -159,7 +159,7 @@ public class UserTest {
         user.setCountryCode("+244");
 
 
-        assertNotNull( userService.updateUser("65456e01-1a28-42bf-b217-07506efbd654", user));
+        assertNotNull( userService.updateUser("59466b9b-1ce4-4cb4-9689-6600493bb9d6", user));
 
     }
 
@@ -174,7 +174,7 @@ public class UserTest {
         user.setCountryCode("+244");
 
         try {
-            assertNotNull( userService.updateUser("65456e01-1a28-42bf-b217-07506efbd654", user));
+            assertNotNull( userService.updateUser("59466b9b-1ce4-4cb4-9689-6600493bb9d6", user));
             fail("Expected DataIntegrityViolationException to be thrown");
         } catch (DataIntegrityViolationException e) {
             assertEquals(ErrorMessages.WRONG_NUMBER_FORMAT, e.getMessage());

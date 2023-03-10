@@ -24,10 +24,11 @@ public class FilterConfig {
 
         // provide endpoints which needs to be restricted.
         // All Endpoints would be restricted if unspecified
+        filter.addUrlPatterns("/api/v1/categories/*");
 
 
-        filter.addUrlPatterns("/api/v1/events/restricted");
         return filter;
     }
+
 
 }

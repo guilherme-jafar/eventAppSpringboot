@@ -13,21 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/events")
 public class EventController {
 
-    @GetMapping("/unrestricted")
-    public ResponseEntity<?> index(){
-        return new ResponseEntity<>("Hai this is a normal message..", HttpStatus.OK);
-    }
 
-    @GetMapping("/restricted")
-    public ResponseEntity<?> getRestrictedMessage(){
-
-        try {
-            return new ResponseEntity<>("This is a restricted message", HttpStatus.OK);
-        }catch (JWTDecodeException e){
-            return new ResponseEntity<>("Unauthorized!!", HttpStatus.UNAUTHORIZED);
-        }
-
-
-    }
 
 }

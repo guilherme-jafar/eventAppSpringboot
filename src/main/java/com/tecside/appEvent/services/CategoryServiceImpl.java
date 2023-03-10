@@ -1,18 +1,23 @@
 package com.tecside.appEvent.services;
 
+import org.springframework.data.domain.Page;
 import com.tecside.appEvent.errors.ErrorMessages;
 import com.tecside.appEvent.models.Category;
 import com.tecside.appEvent.repositories.CategoryRepository;
+import com.tecside.appEvent.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.Date;
@@ -34,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<Category> createCategory(Category category) throws DataIntegrityViolationException {
+    public Category createCategory(Category category) throws DataIntegrityViolationException {
 
         String name = category.getName();
 
@@ -49,8 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
         newCategory.setCreatedAt(createdAt);
         newCategory.setName(category.getName());
 
-        categoryRepository.saveAndFlush(newCategory);
-        return categoryRepository.findById(newCategory.getId());
+        return  categoryRepository.saveAndFlush(newCategory);
 
     }
 
@@ -63,6 +67,16 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
+
+    @Override
+    public Page<Category> getCategories(int pageNum, int pageSize, String sortBy){
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(sortBy));
+        return categoryRepository.findAll(pageable);
+
+    }
+
+
 
     @Override
     public List<Category> getCategoriesByName(String name) {
@@ -81,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = optional.get();
 
-        if (updatedCategory.getName() != null) {
+        if (updatedCategory.getName() == null) {
             category.setName(updatedCategory.getName());
         }
 
@@ -111,7 +125,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = optional.get();
 
         if (category.getImage() != null) {
-            System.out.println(category.getImage());
             imageService.blobDelete(category.getImage());
 
         }

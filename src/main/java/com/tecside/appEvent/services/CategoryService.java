@@ -4,6 +4,7 @@ import com.tecside.appEvent.models.Category;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,11 +14,14 @@ import java.util.Optional;
 @Service
 public interface CategoryService {
 
-    Optional<Category> createCategory(Category category) throws DataIntegrityViolationException;
+    Category createCategory(Category category) throws DataIntegrityViolationException;
 
     Optional<Category> getCategoryById(String id);
 
     List<Category> getAllCategories();
+
+
+    Page<Category> getCategories(int pageNum, int pageSize, String sortBy);
 
     List<Category> getCategoriesByName(String name);
 

@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,6 +82,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable("userId") String userId) {
 
@@ -101,6 +103,7 @@ public class UserController {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable("userId") String userId, @RequestBody User user) {
 
@@ -123,6 +126,7 @@ public class UserController {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable("userId") String userId) {
 
